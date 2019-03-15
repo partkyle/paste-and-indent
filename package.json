@@ -2,7 +2,7 @@
 	"name": "paste-and-indent",
 	"displayName": "paste-and-indent",
 	"description": "",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.32.0"
 	},
