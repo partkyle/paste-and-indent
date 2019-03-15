@@ -1,8 +1,9 @@
 {
 	"name": "paste-and-indent",
-  "publisher": "partkyle",
+	"publisher": "partkyle",
 	"displayName": "paste-and-indent",
 	"description": "",
+	"repository": "https://github.com/partkyle/paste-and-indent.git",
 	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.32.0"
