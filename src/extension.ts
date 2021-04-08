@@ -34,22 +34,23 @@ let handle_selection = (editor: vscode.TextEditor, builder: vscode.TextEditorEdi
 			// by itself
 			if (lines.length > 0 && lines[lines.length-1].match(/^\s*$/)) {
 				lines.pop();
-			}
+            }
 
-			let r = /^\s*/;
-			let match = new_content.match(r);
-			if (match && match.length > 0) {
-				// gotta remember to replace it
-				new_content = new_content.replace(r, '');
 
-				let prefix = match[0];
-				lines = lines.map(line => {
-					if (line.startsWith(prefix)) {
-						return line.slice(prefix.length);
-					}
-					return line;
-				});
-			}
+			// let r = /^\s*/;
+			// let match = new_content.match(r);
+			// if (match && match.length > 0) {
+			// 	// gotta remember to replace it
+			// 	new_content = new_content.replace(r, '');
+
+			// 	let prefix = match[0];
+			// 	lines = lines.map(line => {
+			// 		if (line.startsWith(prefix)) {
+			// 			return line.slice(prefix.length);
+			// 		}
+			// 		return line;
+			// 	});
+			// }
 
 			lines = lines.map(line => { return line_prefix + line; });
 			lines.unshift(new_content);
@@ -80,28 +81,7 @@ let paste_and_indent = () => {
 					});
 				}
 			});
-		});
-
-
-		// .then(success => {
-		// 	myedit.selections.forEach(selection => {
-		// 		let postion = selection.end;
-		// 		selection = new vscode.Selection(postion, postion);
-		// 	});
-		// });
-
-		// myedit.selections.forEach(selection => {
-		// 	myedit.edit((editBuilder: vscode.TextEditorEdit) => {
-		// 		editBuilder.replace(selection, "asdfasdfa");
-		// 	}).then(success => {
-		// 		if (success) {
-		// 			console.log('thig thing alkjsdflkjasdflkj');
-		// 			// make selection empty
-		// 			var postion = myedit.selection.end;
-		// 			selection = new vscode.Selection(postion, postion);
-		// 		}
-		// 	});
-		// });
+        });
 	}
 };
 
