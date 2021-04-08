@@ -28,7 +28,7 @@ let handle_selection = (editor: vscode.TextEditor, builder: vscode.TextEditorEdi
 		let line_prefix = line_match[0];
 		let lines = content.split('\n');
 		let new_content = lines.shift();
-		if (new_content) {
+        if (new_content || new_content == '') {
 			// remove a last blank line
 			// there is almost always going to be a newline that ends up
 			// by itself
@@ -81,7 +81,7 @@ let paste_and_indent = () => {
 				}
 			});
 		});
-	
+
 
 		// .then(success => {
 		// 	myedit.selections.forEach(selection => {
@@ -97,7 +97,7 @@ let paste_and_indent = () => {
 		// 		if (success) {
 		// 			console.log('thig thing alkjsdflkjasdflkj');
 		// 			// make selection empty
-		// 			var postion = myedit.selection.end; 
+		// 			var postion = myedit.selection.end;
 		// 			selection = new vscode.Selection(postion, postion);
 		// 		}
 		// 	});
