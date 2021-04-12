@@ -22,38 +22,40 @@ let handle_selection = (editor: vscode.TextEditor, builder: vscode.TextEditorEdi
 	// is before all of this.
 	// Note: this won't work if there are different indent styles
 	//       in the pasted code
+    let leading_whitespace_regex = (/^\s*$/)
 	let line_contents = editor.document.getText(this_line);
-	let line_match = line_contents.match(/^\s*$/);
+    let line_match = line_contents.match(leading_whitespace_regex);
 	if (line_match && line_match.length > 0) {
 		let line_prefix = line_match[0];
-		let lines = content.split('\n');
+        let lines = content.split('\n');
+        // Find the line with the least amount of initial whitespace and remove
+        // that much whitespace from each line; left justify paste.
+        let dedent = null
+        for (let line of lines) {
+            if (line.trim().length > 0) {
+                let match = line.match(/^\s*/)
+                let leading_whitespace = ''
+                if (match != null) {
+                    leading_whitespace = match[0]
+                }
+                if (dedent == null || leading_whitespace.length < dedent.length) {
+                    dedent = leading_whitespace
+                }
+            }
+        }
+        if (dedent == null) {
+            dedent = ''
+        }
 		let new_content = lines.shift();
         if (new_content || new_content == '') {
 			// remove a last blank line
 			// there is almost always going to be a newline that ends up
 			// by itself
-			if (lines.length > 0 && lines[lines.length-1].match(/^\s*$/)) {
+            if (lines.length > 0 && lines[lines.length - 1].match(leading_whitespace_regex)) {
 				lines.pop();
             }
-
-
-			// let r = /^\s*/;
-			// let match = new_content.match(r);
-			// if (match && match.length > 0) {
-			// 	// gotta remember to replace it
-			// 	new_content = new_content.replace(r, '');
-
-			// 	let prefix = match[0];
-			// 	lines = lines.map(line => {
-			// 		if (line.startsWith(prefix)) {
-			// 			return line.slice(prefix.length);
-			// 		}
-			// 		return line;
-			// 	});
-			// }
-
-			lines = lines.map(line => { return line_prefix + line; });
-			lines.unshift(new_content);
+            lines = lines.map(line => { return line_prefix + line.substring(dedent.length); });
+            lines.unshift(new_content.substring(dedent.length));
 			new_content = lines.join('\n');
 
 			if (new_content) {
