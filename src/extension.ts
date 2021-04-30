@@ -7,7 +7,7 @@ let handle_selection = (editor: vscode.TextEditor, builder: vscode.TextEditorEdi
     let this_line = new vscode.Selection(start_line, selection.start);
 	// Note: this won't work if there are different indent styles
 	//       in the pasted code; tab characters.
-    let leading_whitespace_regex = (/^\s*$/)
+    let leading_whitespace_regex = (/^\s*/)
 	let line_contents = editor.document.getText(this_line);
     let line_match = line_contents.match(leading_whitespace_regex);
     let line_prefix = '';
@@ -15,12 +15,12 @@ let handle_selection = (editor: vscode.TextEditor, builder: vscode.TextEditorEdi
         line_prefix = line_match[0];
     }
     let lines = content.split('\n');
-    // Find the line with the least amount of initial whitespace and remove
-    // that much whitespace from each line; left justify paste.
+    // Find the pasted line with the least amount of initial whitespace and
+    // remove that much whitespace from each line; left justify paste.
     let dedent = null
     for (let line of lines) {
         if (line.trim().length > 0) {
-            let match = line.match(/^\s*/)
+            let match = line.match(leading_whitespace_regex)
             let leading_whitespace = ''
             if (match != null) {
                 leading_whitespace = match[0]
