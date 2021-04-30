@@ -4,62 +4,51 @@ import * as vscode from 'vscode';
 
 let handle_selection = (editor: vscode.TextEditor, builder: vscode.TextEditorEdit, selection: vscode.Selection, content: string) => {
 	let start_line = new vscode.Position(selection.start.line, 0);
-	let this_line = new vscode.Selection(start_line, selection.start);
-
-	// this only really works when you have a block selection that is all
-	// left aligned.
-
-	// to normalize the paste block, we need to:
-	// 1. look at the first line
-	// 2. count the whitespace
-	// 3. remove that exact content from every line
-
-	// need to handle the case where every line starts with the same number of
-	// whitespace characters. we should just be able to trim them.
-
-	// simple scenario where the content is all left aligned
-	// we just need to paste and repeat whatever the prefix
-	// is before all of this.
+    let this_line = new vscode.Selection(start_line, selection.start);
 	// Note: this won't work if there are different indent styles
-	//       in the pasted code
+	//       in the pasted code; tab characters.
+    let leading_whitespace_regex = (/^\s*/)
 	let line_contents = editor.document.getText(this_line);
-	let line_match = line_contents.match(/^\s*$/);
-	if (line_match && line_match.length > 0) {
-		let line_prefix = line_match[0];
-		let lines = content.split('\n');
-		let new_content = lines.shift();
-        if (new_content || new_content == '') {
-			// remove a last blank line
-			// there is almost always going to be a newline that ends up
-			// by itself
-			if (lines.length > 0 && lines[lines.length-1].match(/^\s*$/)) {
-				lines.pop();
-			}
+    let line_match = line_contents.match(leading_whitespace_regex);
+    let line_prefix = '';
+    if (line_match && line_match.length > 0) {
+        line_prefix = line_match[0];
+    }
+    let lines = content.split('\n');
+    // Find the pasted line with the least amount of initial whitespace and
+    // remove that much whitespace from each line; left justify paste.
+    let dedent = null
+    for (let line of lines) {
+        if (line.trim().length > 0) {
+            let match = line.match(leading_whitespace_regex)
+            let leading_whitespace = ''
+            if (match != null) {
+                leading_whitespace = match[0]
+            }
+            if (dedent == null || leading_whitespace.length < dedent.length) {
+                dedent = leading_whitespace
+            }
+        }
+    }
+    if (dedent == null) {
+        dedent = ''
+    }
+    let new_content = lines.shift();
+    if (new_content || new_content == '') {
+        // remove a last blank line
+        // there is almost always going to be a newline that ends up
+        // by itself
+        if (lines.length > 0 && lines[lines.length - 1].match(leading_whitespace_regex)) {
+            lines.pop();
+        }
+        lines = lines.map(line => { return line_prefix + line.substring(dedent.length); });
+        lines.unshift(new_content.substring(dedent.length));
+        new_content = lines.join('\n');
 
-			let r = /^\s*/;
-			let match = new_content.match(r);
-			if (match && match.length > 0) {
-				// gotta remember to replace it
-				new_content = new_content.replace(r, '');
-
-				let prefix = match[0];
-				lines = lines.map(line => {
-					if (line.startsWith(prefix)) {
-						return line.slice(prefix.length);
-					}
-					return line;
-				});
-			}
-
-			lines = lines.map(line => { return line_prefix + line; });
-			lines.unshift(new_content);
-			new_content = lines.join('\n');
-
-			if (new_content) {
-				builder.replace(selection, new_content);
-			}
-		}
-	}
+        if (new_content) {
+            builder.replace(selection, new_content);
+        }
+    }
 };
 
 let paste_and_indent = () => {
@@ -80,28 +69,7 @@ let paste_and_indent = () => {
 					});
 				}
 			});
-		});
-
-
-		// .then(success => {
-		// 	myedit.selections.forEach(selection => {
-		// 		let postion = selection.end;
-		// 		selection = new vscode.Selection(postion, postion);
-		// 	});
-		// });
-
-		// myedit.selections.forEach(selection => {
-		// 	myedit.edit((editBuilder: vscode.TextEditorEdit) => {
-		// 		editBuilder.replace(selection, "asdfasdfa");
-		// 	}).then(success => {
-		// 		if (success) {
-		// 			console.log('thig thing alkjsdflkjasdflkj');
-		// 			// make selection empty
-		// 			var postion = myedit.selection.end;
-		// 			selection = new vscode.Selection(postion, postion);
-		// 		}
-		// 	});
-		// });
+        });
 	}
 };
 
